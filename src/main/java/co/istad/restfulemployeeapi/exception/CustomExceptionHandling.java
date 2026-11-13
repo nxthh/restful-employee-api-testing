@@ -2,6 +2,7 @@ package co.istad.restfulemployeeapi.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,10 +17,11 @@ import java.util.List;
 @Slf4j
 public class CustomExceptionHandling {
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ErrorResponse<?> handleServiceException(ResponseStatusException e){
 
-        return ErrorResponse.builder()
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse<?>> handleServiceException(ResponseStatusException e) {
+
+        ErrorResponse<?> body = ErrorResponse.builder()
                 .status(Boolean.FALSE)
                 .code(e.getStatusCode().value())
                 .message(e.getReason() != null ? e.getReason() : "Request failed")
@@ -27,11 +29,12 @@ public class CustomExceptionHandling {
                 .timestamp(LocalDateTime.now())
                 .build();
 
+        return ResponseEntity.status(e.getStatusCode()).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse<?> handleApiValidation(MethodArgumentNotValidException e){
+    public ErrorResponse<?> handleApiValidation(MethodArgumentNotValidException e) {
         List<FieldErrorResponse> errors = new ArrayList<>();
 
         e.getBindingResult().getFieldErrors()

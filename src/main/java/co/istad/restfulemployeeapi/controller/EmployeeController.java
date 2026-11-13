@@ -30,26 +30,27 @@ public class EmployeeController {
         return service.getEmployeeById(id);
     }
 
+    @GetMapping("/search")
+    public List<EmployeeResponse> searchByName(@RequestParam String name) {
+        return service.findEmployeesByName(name);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EmployeeResponse createEmployee(
-            @Valid @RequestBody CreateEmployeeRequest createRequest
-            ) {
+    public EmployeeResponse createEmployee(@Valid @RequestBody CreateEmployeeRequest createRequest) {
         return service.createEmployee(createRequest);
     }
 
     @PatchMapping("/{id}")
-    public EmployeeResponse updateProductById(
-            @PathVariable Integer id, @RequestBody UpdateEmployeeRequest updateEmployeeRequest
-            ){
-        return service.updateEmployee(updateEmployeeRequest);
+    public EmployeeResponse updateEmployeeById(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateEmployeeRequest updateEmployeeRequest) {
+        return service.updateEmployee(id, updateEmployeeRequest);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEmployeeById(
-            @PathVariable Integer id
-    ){
+    public void deleteEmployeeById(@PathVariable Integer id) {
         service.deleteEmployeeById(id);
     }
 

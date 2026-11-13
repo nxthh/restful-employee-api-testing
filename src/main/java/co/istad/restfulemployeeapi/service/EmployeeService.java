@@ -15,8 +15,9 @@ public interface EmployeeService {
 
     EmployeeResponse createEmployee(CreateEmployeeRequest createEmployeeRequest);
 
-    EmployeeResponse updateEmployee(UpdateEmployeeRequest updateEmployeeRequest);
+    EmployeeResponse updateEmployee(Integer id, UpdateEmployeeRequest updateEmployeeRequest);
 
     void deleteEmployeeById(Integer id);
 
+    List<EmployeeResponse> findEmployeesByName(String name);
 }

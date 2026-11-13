@@ -77,13 +77,52 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeResponse updateEmployee(UpdateEmployeeRequest updateEmployeeRequest) {
-        return null;
+    public EmployeeResponse updateEmployee(Integer id, UpdateEmployeeRequest updateEmployeeRequest) {
+        Employee employee = repository.findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Employee not found."
+                        )
+                );
+
+        if (updateEmployeeRequest.email() != null && repository.existsByEmailAndIdNot(updateEmployeeRequest.email(), id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email is already existed."
+            );
+        }
+
+        mapper.updateEntity(employee, updateEmployeeRequest);
+
+        repository.save(employee);
+
+        return mapper.toResponse(employee);
     }
 
     @Override
     public void deleteEmployeeById(Integer id) {
 
+        if (!repository.existsById(id)){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Employee not found."
+            );
+        }
+
+        repository.deleteById(id);
+
+    }
+
+    @Override
+    public List<EmployeeResponse> findEmployeesByName(String name) {
+
+        List<Employee> employees = repository
+                .findAllByNameContainingIgnoreCase(name);
+
+        return employees.stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 }
 
