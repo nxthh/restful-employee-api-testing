@@ -1,5 +1,15 @@
 spring:
   application:
     name: employee-api
+  datasource:
+    url: jdbc:postgresql://localhost:5555/postgres
+    username: employee_user
+    password: employee_password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+#     ddl-auto: update
+    show-sql: true
+
 server:
   port: 8888

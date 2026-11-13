@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record ErrorResponse(
+public record ErrorResponse<T>(
 
         Boolean status,
 

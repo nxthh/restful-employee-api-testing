@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: emp-db-cont
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: employee_user
+      POSTGRES_PASSWORD: employee_password
+    ports:
+      - "5555:5432"
