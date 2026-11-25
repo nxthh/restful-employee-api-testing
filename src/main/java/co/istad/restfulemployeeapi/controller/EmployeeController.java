@@ -2,6 +2,7 @@ package co.istad.restfulemployeeapi.controller;
 
 import co.istad.restfulemployeeapi.dto.employee.CreateEmployeeRequest;
 import co.istad.restfulemployeeapi.dto.employee.EmployeeResponse;
+import co.istad.restfulemployeeapi.dto.employee.TransferEmployeeRequest;
 import co.istad.restfulemployeeapi.service.EmployeeService;
 import co.istad.restfulemployeeapi.utils.PageResponse;
 import jakarta.validation.Valid;
@@ -25,6 +26,11 @@ public class EmployeeController {
             @RequestParam(required = false, defaultValue = "8") int size
     ) {
         return service.getAllWithPage(page, size);
+    }
+
+    @GetMapping("/search")
+    public List<EmployeeResponse> searchEmployees(@RequestParam String keyword) {
+        return service.searchEmployees(keyword);
     }
 
     @GetMapping("/{id}")
@@ -52,6 +58,14 @@ public class EmployeeController {
             @Valid @RequestBody List<CreateEmployeeRequest> createRequest
     ) {
         return service.bulkCreate(createRequest);
+    }
+
+    @PatchMapping("/{id}/transfer")
+    public EmployeeResponse transferEmployee(
+            @PathVariable String id,
+            @Valid @RequestBody TransferEmployeeRequest request
+    ) {
+        return service.transferEmployee(id, request);
     }
 
 }

@@ -2,6 +2,7 @@ package co.istad.restfulemployeeapi.service;
 
 import co.istad.restfulemployeeapi.dto.employee.CreateEmployeeRequest;
 import co.istad.restfulemployeeapi.dto.employee.EmployeeResponse;
+import co.istad.restfulemployeeapi.dto.employee.TransferEmployeeRequest;
 import co.istad.restfulemployeeapi.dto.employee.UpdateEmployeeRequest;
 import co.istad.restfulemployeeapi.utils.PageResponse;
 import jakarta.validation.Valid;
@@ -26,4 +27,8 @@ public interface EmployeeService {
     EmployeeResponse bulkCreate(@Valid List<CreateEmployeeRequest> createRequest);
 
     PageResponse<EmployeeResponse> getAllWithPage(int page, int size);
+
+    List<EmployeeResponse> searchEmployees(String keyword);
+
+    EmployeeResponse transferEmployee(String id, TransferEmployeeRequest request);
 }

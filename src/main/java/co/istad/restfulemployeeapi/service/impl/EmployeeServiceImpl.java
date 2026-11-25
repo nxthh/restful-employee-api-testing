@@ -4,6 +4,7 @@ import co.istad.restfulemployeeapi.domain.Department;
 import co.istad.restfulemployeeapi.domain.Employee;
 import co.istad.restfulemployeeapi.dto.employee.CreateEmployeeRequest;
 import co.istad.restfulemployeeapi.dto.employee.EmployeeResponse;
+import co.istad.restfulemployeeapi.dto.employee.TransferEmployeeRequest;
 import co.istad.restfulemployeeapi.dto.employee.UpdateEmployeeRequest;
 import co.istad.restfulemployeeapi.mapper.EmployeeMapper;
 import co.istad.restfulemployeeapi.repository.DepartmentRepository;
@@ -156,6 +157,62 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .totalPages(employees.getTotalPages())
                 .build();
 
+    }
+
+    @Override
+    public List<EmployeeResponse> searchEmployees(String keyword) {
+
+        if (keyword == null || keyword.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Keyword is required"
+            );
+        }
+
+        String trimmedKeyword = keyword.trim();
+
+        return employeeRepository
+                .findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(trimmedKeyword, trimmedKeyword)
+                .stream()
+                .map(employeeMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public EmployeeResponse transferEmployee(String id, TransferEmployeeRequest request) {
+
+        Employee emp = getById(id);
+
+        Department destination = departmentRepository
+                .findById(request.departmentId())
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Department has not been found"
+                        )
+                );
+
+        if (!Boolean.TRUE.equals(destination.getIsActive())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Destination department is not active"
+            );
+        }
+
+        if (emp.getDepartment() != null
+                && emp.getDepartment().getId().equals(destination.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Employee is already in this department"
+            );
+        }
+
+        emp.setDepartment(destination);
+
+        employeeRepository.save(emp);
+
+        return employeeMapper.toResponse(emp);
     }
 
     private void checkIdExists(String id) {

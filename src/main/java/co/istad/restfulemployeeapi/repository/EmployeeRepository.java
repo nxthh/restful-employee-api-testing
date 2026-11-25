@@ -41,4 +41,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     List<Employee> id(String id);
 
     Page<Employee> findAllByIsActiveTrue(Pageable pageable);
+
+    List<Employee> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email);
+
+    Page<Employee> findAllByDepartmentId(String departmentId, Pageable pageable);
+
+    long countByDepartmentId(String departmentId);
+
+    long countByDepartmentIdAndIsActiveTrue(String departmentId);
+
+    // JPQL
+    @Query(value = "select avg(e.salary) from Employee e where e.department.id = :departmentId")
+    Double getAverageSalaryByDepartmentId(String departmentId);
 }
