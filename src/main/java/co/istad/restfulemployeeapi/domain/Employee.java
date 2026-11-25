@@ -13,39 +13,33 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "employees")
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    @Column(
-            nullable = false
-    )
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(
-            nullable = false,
-            unique = true
-    )
-
+    @Column(length = 150)
     private String email;
 
-    @Column(
-            nullable = false,
-            check = @CheckConstraint(
-                    constraint = "salary > 0"
-            ),
-            precision = 10,
-            scale = 2
-    )
+    @Column(precision = 10, scale = 2)
     private BigDecimal salary;
 
+    @Column(nullable = false)
     private LocalDate hireDate;
 
     private Boolean isActive;
+
+    @ManyToOne
+    @JoinColumn(
+            name = "department_id",
+            referencedColumnName = "id"
+    )
+    private Department department;
 
 }

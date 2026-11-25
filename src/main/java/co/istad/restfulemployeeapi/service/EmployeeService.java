@@ -1,8 +1,11 @@
 package co.istad.restfulemployeeapi.service;
 
-import co.istad.restfulemployeeapi.dto.CreateEmployeeRequest;
-import co.istad.restfulemployeeapi.dto.EmployeeResponse;
-import co.istad.restfulemployeeapi.dto.UpdateEmployeeRequest;
+import co.istad.restfulemployeeapi.dto.employee.CreateEmployeeRequest;
+import co.istad.restfulemployeeapi.dto.employee.EmployeeResponse;
+import co.istad.restfulemployeeapi.dto.employee.UpdateEmployeeRequest;
+import co.istad.restfulemployeeapi.utils.PageResponse;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,14 +13,17 @@ public interface EmployeeService {
 
     // CRUD: Create, Read, Update, Delete
     List<EmployeeResponse> getAll();
+    EmployeeResponse getEmployeeById(String id);
 
-    EmployeeResponse getEmployeeById(Integer id);
+    EmployeeResponse createEmployee(CreateEmployeeRequest employeeRequest);
 
-    EmployeeResponse createEmployee(CreateEmployeeRequest createEmployeeRequest);
+    EmployeeResponse updateEmployeeById(String id, UpdateEmployeeRequest updateEmployeeRequest);
 
-    EmployeeResponse updateEmployee(Integer id, UpdateEmployeeRequest updateEmployeeRequest);
+    void deleteEmployeeById(String id);
 
-    void deleteEmployeeById(Integer id);
+    void updateEmployeeStatus(String id, Boolean status);
 
-    List<EmployeeResponse> findEmployeesByName(String name);
+    EmployeeResponse bulkCreate(@Valid List<CreateEmployeeRequest> createRequest);
+
+    PageResponse<EmployeeResponse> getAllWithPage(int page, int size);
 }

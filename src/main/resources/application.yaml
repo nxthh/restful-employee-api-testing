@@ -1,14 +1,15 @@
 spring:
   application:
     name: employee-api
+
   datasource:
-    url: jdbc:postgresql://localhost:5555/postgres
-    username: employee_user
-    password: employee_password
+    url: jdbc:postgresql://localhost:5444/emp_db
+    username: emp_user
+    password: emp_pass
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
-#     ddl-auto: update
+      ddl-auto: update
     show-sql: true
 
 server:

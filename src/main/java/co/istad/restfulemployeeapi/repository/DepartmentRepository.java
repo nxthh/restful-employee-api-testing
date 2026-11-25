@@ -1,0 +1,11 @@
+package co.istad.restfulemployeeapi.repository;
+
+import co.istad.restfulemployeeapi.domain.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DepartmentRepository extends
+        JpaRepository<Department, String> {
+
+
+
+}

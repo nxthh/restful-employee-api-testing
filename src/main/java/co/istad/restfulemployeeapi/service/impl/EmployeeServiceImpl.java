@@ -1,13 +1,20 @@
 package co.istad.restfulemployeeapi.service.impl;
 
+import co.istad.restfulemployeeapi.domain.Department;
 import co.istad.restfulemployeeapi.domain.Employee;
-import co.istad.restfulemployeeapi.dto.CreateEmployeeRequest;
-import co.istad.restfulemployeeapi.dto.EmployeeResponse;
-import co.istad.restfulemployeeapi.dto.UpdateEmployeeRequest;
+import co.istad.restfulemployeeapi.dto.employee.CreateEmployeeRequest;
+import co.istad.restfulemployeeapi.dto.employee.EmployeeResponse;
+import co.istad.restfulemployeeapi.dto.employee.UpdateEmployeeRequest;
 import co.istad.restfulemployeeapi.mapper.EmployeeMapper;
+import co.istad.restfulemployeeapi.repository.DepartmentRepository;
 import co.istad.restfulemployeeapi.repository.EmployeeRepository;
 import co.istad.restfulemployeeapi.service.EmployeeService;
+import co.istad.restfulemployeeapi.utils.PageResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,114 +23,158 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+//@Transactional(readOnly = true)
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private final EmployeeRepository repository;
-    private final EmployeeMapper mapper;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeMapper employeeMapper;
+
+    private final DepartmentRepository departmentRepository;
 
 
     @Override
     public List<EmployeeResponse> getAll() {
-
-        List<Employee> employees = repository.findAll();
-
-        return employees
+        return employeeRepository.findAll()
                 .stream()
-                .map(mapper::toResponse)
+                .map(employeeMapper::toResponse)
                 .toList();
     }
 
     @Override
-    public EmployeeResponse getEmployeeById(Integer id)
-    {
+    public EmployeeResponse getEmployeeById(String id) {
 
-//        Employee foundEmployee = repository.findById(id)
-//                .orElseThrow(
-//                        () -> new ResponseStatusException(
-//                                HttpStatus.NOT_FOUND,
-//                                "Employee not found."
-//                        )
-//                );
-//
-//        return mapper.toResponse(foundEmployee);
+        Employee emp = getById(id);
 
-        return repository.findById(id)
-                .map(mapper::toResponse)
+        return employeeMapper.toResponse(emp);
+
+    }
+
+    @Transactional
+    @Override
+    public EmployeeResponse createEmployee(CreateEmployeeRequest employeeRequest) {
+
+        Department existDepartment = departmentRepository
+                .findById(employeeRequest.departmentId())
                 .orElseThrow(
                         () -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
-                                "Employee not found."
+                                "Department has not been found"
                         )
                 );
 
-    }
-
-    @Override
-    public EmployeeResponse createEmployee(CreateEmployeeRequest createEmployeeRequest) {
-
-        if (repository.existsByEmail(createEmployeeRequest.email())) {
+        if (employeeRepository.existsByEmail(employeeRequest.email())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Email is already existed."
+                    "Email is already existed"
             );
         }
 
-        Employee employee = mapper.fromCreateEmployeeRequest(createEmployeeRequest);
-        employee.setIsActive(Boolean.TRUE);
+        Employee emp = employeeMapper.fromCreateEmployeeRequest(employeeRequest);
+        emp.setIsActive(Boolean.TRUE);
+        emp.setDepartment(existDepartment);
 
-        repository.save(employee);
+        employeeRepository.save(emp);
 
-        return mapper.toResponse(employee);
+        return employeeMapper.toResponse(emp);
+
     }
 
     @Override
-    public EmployeeResponse updateEmployee(Integer id, UpdateEmployeeRequest updateEmployeeRequest) {
-        Employee employee = repository.findById(id)
-                .orElseThrow(
-                        () -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Employee not found."
-                        )
+    public EmployeeResponse updateEmployeeById(String id, UpdateEmployeeRequest updateEmployeeRequest) {
+        return null;
+    }
+
+    @Override
+    public void deleteEmployeeById(String id) {
+
+    }
+
+    @Transactional
+    @Override
+    public void updateEmployeeStatus(String id, Boolean status) {
+
+        checkIdExists(id);
+
+        employeeRepository.updateEmployeeStatus(id, status);
+    }
+
+    @Override
+    public EmployeeResponse bulkCreate(List<CreateEmployeeRequest> createRequest) {
+
+        for (CreateEmployeeRequest request : createRequest) {
+
+            Department existDepartment = departmentRepository
+                    .findById(request.departmentId())
+                    .orElseThrow(
+                            () -> new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND,
+                                    "Department has not been found"
+                            )
+                    );
+
+            if (employeeRepository.existsByEmail(request.email())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Email is already existed"
                 );
+            }
 
-        if (updateEmployeeRequest.email() != null && repository.existsByEmailAndIdNot(updateEmployeeRequest.email(), id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email is already existed."
-            );
+            Employee emp = employeeMapper.fromCreateEmployeeRequest(request);
+            emp.setIsActive(Boolean.TRUE);
+            emp.setDepartment(existDepartment);
+
+            employeeRepository.save(emp);
+
         }
 
-        mapper.updateEntity(employee, updateEmployeeRequest);
-
-        repository.save(employee);
-
-        return mapper.toResponse(employee);
+        return null;
     }
 
     @Override
-    public void deleteEmployeeById(Integer id) {
+    public PageResponse<EmployeeResponse> getAllWithPage(int page, int size) {
 
-        if (!repository.existsById(id)){
+        if (page < 0 || size < 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    """
+                            Invalid Page Request.
+                            Page must and Size be greater than 0."""
+            );
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+//        Page<Employee> employees = employeeRepository.findAll(pageable);
+
+        Page<Employee> employees = employeeRepository.findAllByIsActiveTrue(pageable);
+
+        return PageResponse.<EmployeeResponse>builder()
+                .content(employees.getContent().stream().map(employeeMapper::toResponse).toList())
+                .pageNumber(employees.getNumber())
+                .size(employees.getSize())
+                .totalElements(employees.getTotalElements())
+                .totalPages(employees.getTotalPages())
+                .build();
+
+    }
+
+    private void checkIdExists(String id) {
+        if(!employeeRepository.existsById(id)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Employee not found."
+                    "Employee has not been found"
             );
         }
-
-        repository.deleteById(id);
-
     }
 
-    @Override
-    public List<EmployeeResponse> findEmployeesByName(String name) {
-
-        List<Employee> employees = repository
-                .findAllByNameContainingIgnoreCase(name);
-
-        return employees.stream()
-                .map(mapper::toResponse)
-                .toList();
+    private Employee getById(String id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Employee has not been found"
+                        )
+                );
     }
+
 }
-
-

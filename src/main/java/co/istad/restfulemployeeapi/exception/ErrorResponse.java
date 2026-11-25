@@ -14,7 +14,7 @@ public record ErrorResponse<T>(
 
         String message,
 
-        List<FieldErrorResponse> errors,
+        T errors,
 
         LocalDateTime timestamp
 

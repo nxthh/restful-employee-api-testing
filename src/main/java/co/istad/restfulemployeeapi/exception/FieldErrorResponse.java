@@ -7,5 +7,7 @@ public record FieldErrorResponse(
 
         String field,
 
-        String message) {
+        String message
+
+) {
 }

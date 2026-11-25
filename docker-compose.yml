@@ -1,11 +1,15 @@
 services:
-  postgres:
-    image: postgres:17-alpine
-    container_name: emp-db-cont
-    restart: unless-stopped
+  db:
+    image: postgres:14.25-alpine3.24
+    container_name: emp_db_cont
     environment:
-      POSTGRES_DB: employee_db
-      POSTGRES_USER: employee_user
-      POSTGRES_PASSWORD: employee_password
+      POSTGRES_DB: emp_db
+      POSTGRES_USER: emp_user
+      POSTGRES_PASSWORD: emp_pass
     ports:
-      - "5555:5432"
+      - "5444:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql
+
+volumes:
+  pg_data:
