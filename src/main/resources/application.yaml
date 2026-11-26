@@ -2,6 +2,7 @@ spring:
   application:
     name: employee-api
 
+
   datasource:
     url: jdbc:postgresql://localhost:5444/emp_db
     username: emp_user
@@ -11,6 +12,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 25MB
+
+media:
+  location: /home/nxth/Documents/fullstack/backend/spring/restful-employee-api-testing/uploads
+  client-url: /media
+  base-url: http://localhost:8888
 
 server:
   port: 8888

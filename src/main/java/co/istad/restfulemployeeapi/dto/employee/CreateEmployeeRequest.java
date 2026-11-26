@@ -1,5 +1,6 @@
 package co.istad.restfulemployeeapi.dto.employee;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,6 +15,9 @@ public record CreateEmployeeRequest(
 
         @Email(message = "Invalid email format")
         String email,
+
+        @Nullable
+        String profileUrl,
 
         @Positive(message = "Salary must be greater than 0")
         @NotNull(message = "Salary is required")

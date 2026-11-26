@@ -11,6 +11,8 @@ public record EmployeeResponse(
 
     String name,
 
+    String profileUrl,
+
     String email,
 
     BigDecimal salary,

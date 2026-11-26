@@ -24,6 +24,8 @@ public class Employee {
     @Column(nullable = false, length = 100)
     private String name;
 
+    private String profileUrl;
+
     @Column(length = 150)
     private String email;
 
